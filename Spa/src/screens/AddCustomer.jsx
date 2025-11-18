@@ -1,4 +1,4 @@
-import { View, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native'
+import { View, StyleSheet, TextInput, TouchableOpacity, Text, Alert } from 'react-native'
 import { globalStyle, MAIN_COLOR, MUTED_COLOR } from '../../styles';
 import { useState } from 'react';
 import { addCustomer } from '../services/api'
@@ -8,18 +8,19 @@ const AddCustomer = ({ navigation, route }) => {
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
 
+
     const addCus = async () => {
         try {
             const res = await addCustomer(name, phone);
+            Alert.alert('Success', 'Customer added successfully', [{ text: 'OK' }])
             navigation.navigate('Main', { screen: 'Customer' });
         } catch (error) {
             console.error(error)
-
         }
     }
 
     return (<View style={styles.container}>
-        <Text style={styles.label}>Service name *</Text>
+        <Text style={styles.label}>Customer name *</Text>
         <TextInput
             placeholder='Input your customer name'
             placeholderTextColor={MUTED_COLOR}

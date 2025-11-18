@@ -24,10 +24,10 @@ const Customer = ({ navigation }) => {
     const customerItem = ({ item }) => {
         return (
             <View style={styles.container}>
-                <View>
-                    <Text><Text style={styles.label}>Customer: </Text>{item.name}</Text>
-                    <Text><Text style={styles.label}>Phone: </Text>{item.phone}</Text>
-                    <Text style={{ fontWeight: 'bold', color: MAIN_COLOR }}><Text style={styles.label}>Total money: </Text>{formatVND(item.totalSpent)}</Text>
+                <View style={{ flex: 1 }}>
+                    <Text numberOfLines={1}><Text style={styles.label}>Customer: </Text>{item.name}</Text>
+                    <Text numberOfLines={1}><Text style={styles.label}>Phone: </Text>{item.phone}</Text>
+                    <Text style={{ fontWeight: 'bold', color: MAIN_COLOR }} numberOfLines={1}><Text style={styles.label}>Total money: </Text>{formatVND(item.totalSpent)}</Text>
                 </View>
                 <View style={styles.iconContainer}>
                     <MaterialDesignIcons name="crown" size={20} color={MAIN_COLOR} />
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     label: {
         color: MUTED_COLOR,
