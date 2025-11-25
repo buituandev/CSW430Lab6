@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, ScrollView } from "react-native"
 import { getTransaction } from '../services/api'
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
@@ -10,6 +10,30 @@ const TranDetail = ({ route, navigation }) => {
     const { id } = route.params;
     const [tran, setTran] = useState({})
     const [discount, setDiscount] = useState(0)
+
+    const InfoRow = ({ label, value, isMain = false, isDiscount = false }) => (
+        <View style={styles.rowContainer}>
+            <Text style={styles.label}>{label}</Text>
+            <View style={styles.valueWrapper}>
+                <Text style={[
+                    isMain ? styles.boldMain : styles.bold,
+                    isDiscount && { color: 'red' }
+                ]}>
+                    {value}
+                </Text>
+            </View>
+        </View>
+    );
+
+    const ServiceRow = ({ name, quantity, price }) => (
+        <View style={styles.rowContainer}>
+            <Text style={styles.serviceName}>{name}</Text>
+            <View style={styles.serviceRightSide}>
+                <Text style={styles.serviceQty}>x{quantity}</Text>
+                <Text style={styles.bold}>{formatVND(price)}</Text>
+            </View>
+        </View>
+    );
 
     useEffect(() => {
         fetchATran();
@@ -55,99 +79,96 @@ const TranDetail = ({ route, navigation }) => {
         });
     }, [navigation]);
 
+
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.sectionContainer}>
-                <View style={[styles.contentContainer, styles.innerPadding]}>
+                <View style={styles.innerPadding}>
+                    <Text style={[styles.headerTitle, { marginBottom: 12 }]}>General Information</Text>
                     <View style={styles.gap}>
-                        <Text style={styles.boldMuted}>General Information</Text>
-                        <Text style={styles.label}>Transaction code</Text>
-                        <Text style={styles.label}>Customer</Text>
-                        <Text style={styles.label}>Creation time</Text>
-                    </View>
-                    <View style={[styles.gap, styles.rightAlign]}>
-                        <Text></Text>
-                        <Text style={styles.bold}>{tran.id}</Text>
-                        <Text style={styles.bold}>{tran.customer?.name} - {tran.customer?.phone}</Text>
-                        <Text style={styles.bold}>
-                            {new Date(tran?.createdAt).toLocaleString()}
-                        </Text>
+                        <InfoRow
+                            label="Transaction code"
+                            value={tran.id}
+                        />
+                        <InfoRow
+                            label="Customer"
+                            value={tran.customer ? `${tran.customer.name} - ${tran.customer.phone}` : 'N/A'}
+                        />
+                        <InfoRow
+                            label="Creation time"
+                            value={tran.createdAt ? new Date(tran.createdAt).toLocaleString() : '...'}
+                        />
                     </View>
                 </View>
             </View>
 
             <View style={styles.sectionContainer}>
-                <View style={[styles.contentContainer, styles.innerPadding]}>
+                <View style={styles.innerPadding}>
+                    <Text style={[styles.headerTitle, { marginBottom: 12 }]}>Service list</Text>
+
                     <View style={styles.gap}>
-                        <Text style={styles.boldMuted}>Service list</Text>
                         {tran.services?.map((service) => (
-                            <Text key={service._id}>
-                                {service?.name}
-                            </Text>
-                        ))}
-                    </View>
-                    <View style={[styles.gap, styles.rightAlign]}>
-                        <Text></Text>
-                        {tran.services?.map((service) => (
-                            <Text style={{ color: MUTED_COLOR }} key={service._id}>
-                                x{service.quantity}
-                            </Text>
-                        ))}
-                    </View>
-                    <View style={[styles.gap, styles.rightAlign]}>
-                        <Text></Text>
-                        {tran.services?.map((service) => (
-                            <Text style={styles.bold} key={service._id}>
-                                {formatVND(service.price)}
-                            </Text>
+                            <ServiceRow
+                                key={service._id}
+                                name={service.name}
+                                quantity={service.quantity}
+                                price={service.price}
+                            />
                         ))}
                     </View>
                 </View>
 
                 <View style={styles.innerDivider} />
 
-                <View style={[styles.contentContainer, styles.innerPadding]}>
-                    <Text style={styles.boldMuted}>Total</Text>
-                    <Text style={[styles.bold, styles.rightAlign]}>{formatVND(tran.priceBeforePromotion)}</Text>
+                <View style={styles.innerPadding}>
+                    <InfoRow
+                        label="Total"
+                        value={formatVND(tran.priceBeforePromotion)}
+                    />
                 </View>
             </View>
 
             <View style={styles.sectionContainer}>
-                <View style={[styles.contentContainer, styles.innerPadding]}>
+                <View style={styles.innerPadding}>
+                    <Text style={[styles.headerTitle, { marginBottom: 12 }]}>Cost</Text>
+
                     <View style={styles.gap}>
-                        <Text style={styles.boldMuted}>Cost</Text>
-                        <Text style={styles.label}>Account of money</Text>
-                        <Text style={styles.label}>Discount</Text>
-                    </View>
-                    <View style={[styles.gap, styles.rightAlign]}>
-                        <Text></Text>
-                        <Text style={styles.bold}>{formatVND(tran.priceBeforePromotion)}</Text>
-                        <Text style={styles.bold}>- {formatVND(discount)}</Text>
+                        <InfoRow
+                            label="Account of money"
+                            value={formatVND(tran.priceBeforePromotion)}
+                        />
+                        <InfoRow
+                            label="Discount"
+                            value={`- ${formatVND(discount)}`}
+
+                        />
                     </View>
                 </View>
 
                 <View style={styles.innerDivider} />
 
-                <View style={[styles.contentContainer, styles.innerPadding]}>
-                    <Text style={styles.boldMuted}>Total payment</Text>
-                    <Text style={styles.boldMain}>{formatVND(tran.price)}</Text>
+                <View style={styles.innerPadding}>
+                    <InfoRow
+                        label="Total payment"
+                        value={formatVND(tran.price)}
+                        isMain={true}
+                    />
                 </View>
             </View>
-        </View>
+
+        </ScrollView>
     )
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
         padding: 16,
         gap: 16,
+        paddingBottom: 40,
     },
     sectionContainer: {
         backgroundColor: 'white',
         borderRadius: 16,
-
     },
     innerPadding: {
         padding: 16,
@@ -156,32 +177,48 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: MUTED_COLOR,
         marginHorizontal: 16,
-        opacity: 0.5,
-    },
-    contentContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        opacity: 0.2,
     },
     gap: {
-        gap: 8
+        gap: 12,
     },
-    rightAlign: {
-
-        alignItems: 'flex-end',
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
-
     label: {
         fontWeight: 'bold',
-        color: MUTED_COLOR
+        color: MUTED_COLOR,
     },
-    boldMuted: {
+    valueWrapper: {
+        flex: 1,
+        alignItems: 'flex-end',
+    },
+    serviceName: {
+        flex: 1,
+        marginRight: 8,
+        color: '#000',
+    },
+    serviceRightSide: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    serviceQty: {
+        color: MUTED_COLOR,
+        fontWeight: 'bold',
+    },
+
+    headerTitle: {
         fontWeight: 'bold',
         color: MUTED_COLOR,
         fontSize: 16
     },
     bold: {
         fontWeight: 'bold',
-        textAlign: 'right'
+        textAlign: 'right',
+        color: '#000',
     },
     boldMain: {
         fontWeight: 'bold',
@@ -189,6 +226,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: 'right',
     },
+
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8
+    },
+    menuText: {
+        marginLeft: 10,
+        fontSize: 16
+    }
 });
 
 export default TranDetail;
